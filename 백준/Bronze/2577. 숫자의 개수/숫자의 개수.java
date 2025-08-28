@@ -13,6 +13,8 @@ public class Main {
             cnt[mul%10]++;
             mul /= 10;
         }
-        for(int x : cnt) System.out.println(x);
+        StringBuilder sb = new StringBuilder();
+        for (int x : cnt) sb.append(x).append('\n');
+        System.out.print(sb);
     }
 }
