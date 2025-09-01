@@ -1,40 +1,39 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        whole:
-        while(true){
-        String str = br.readLine();
-        if(str.charAt(0)=='.'){break;}
-        Deque<Character> stack = new ArrayDeque<>();
-        for(int i=0;i<str.length();i++){
-            if(str.charAt(i)=='('){
-                stack.push('(');
-            }
-            else if(str.charAt(i)==')'){
-                if(stack.isEmpty() || stack.peek() != '('){
-                    System.out.println("no");
-                    continue whole;
+
+        while (true) {
+            String line = br.readLine();
+            if (line.equals(".")) break;
+
+            Deque<Character> stack = new ArrayDeque<>();
+            boolean ok = true;
+
+            for (char ch : line.toCharArray()) {
+                if (!ok) break; // 이미 실패면 더 안 봐도 됨
+                switch (ch) {
+                    case '(':
+                    case '[':
+                        stack.push(ch);
+                        break;
+                    case ')':
+                        if (stack.isEmpty() || stack.peek() != '(') ok = false;
+                        else stack.pop();
+                        break;
+                    case ']':
+                        if (stack.isEmpty() || stack.peek() != '[') ok = false;
+                        else stack.pop();
+                        break;
+                    default:
                 }
-                else{stack.pop();}
             }
-            else if(str.charAt(i)=='['){
-                stack.push('[');
-            }
-            else if(str.charAt(i)==']'){
-                if(stack.isEmpty() || stack.peek() != '['){
-                    System.out.println("no");
-                    continue whole;
-                }
-                else{stack.pop();}
-            }
-        }
-        if(!stack.isEmpty()){System.out.println("no");}
-        else{System.out.println("yes");}
+            System.out.println(ok && stack.isEmpty() ? "yes" : "no");
         }
     }
 }
