@@ -8,47 +8,51 @@ import java.util.StringTokenizer;
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
+        int T = Integer.parseInt(br.readLine());
         StringBuilder sb = new StringBuilder();
 
-        int n = Integer.parseInt(br.readLine());
-        int numOfPaper;
-        int target;
-        for (int i = 0; i < n; i++) {
-            st = new StringTokenizer(br.readLine());
-            numOfPaper = Integer.parseInt(st.nextToken());
-            target = Integer.parseInt(st.nextToken());
+        while (T-- > 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int nDocs = Integer.parseInt(st.nextToken());
+            int target = Integer.parseInt(st.nextToken());
 
             st = new StringTokenizer(br.readLine());
-            Queue<Integer> idxQ = new ArrayDeque<>();
-            Queue<Integer> prQ = new ArrayDeque<>();
 
-            int max = 0;
-            int cnt = 0;
-            for (int j = 0; j < numOfPaper; j++) {
+            Queue<int[]> q = new ArrayDeque<>(); // [index, priority]
+            int[] counts = new int[10];          // priority: 1..9
+
+            for (int i = 0; i < nDocs; i++) {
                 int pr = Integer.parseInt(st.nextToken());
-                idxQ.offer(j);
-                prQ.offer(pr);
-                if (pr > max) max = pr;
+                q.offer(new int[]{i, pr});
+                counts[pr]++;
             }
+
+            // 현재 남은 문서들 중 최대 우선순위
+            int curMax = 9;
+            while (curMax > 0 && counts[curMax] == 0) curMax--;
+
+            int printed = 0;
             while (true) {
-                if (prQ.peek() == max) {
-                    prQ.poll();
-                    int idx = idxQ.poll();
-                    cnt++;
-                    if (idx == target) {
-                        sb.append(cnt).append("\n");
+                int[] front = q.peek();
+                int idx = front[0], pr = front[1];
+
+                if (pr == curMax) {
+                    q.poll();
+                    printed++;
+                    counts[pr]--;
+
+                    if (idx == target) {     // 타깃이면 끝
+                        sb.append(printed).append('\n');
                         break;
                     }
-                    int newMax = 0;
-                    for (int pr : prQ) newMax = Math.max(newMax, pr);
-                    max = newMax;
+
+                    // 최대값 갱신
+                    while (curMax > 0 && counts[curMax] == 0) curMax--;
                 } else {
-                    prQ.offer(prQ.poll());
-                    idxQ.offer(idxQ.poll());
+                    q.offer(q.poll());       // 뒤로 회전
                 }
             }
         }
-        System.out.println(sb.toString());
+        System.out.print(sb);
     }
 }
