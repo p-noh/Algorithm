@@ -1,81 +1,67 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayDeque;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 public class Main {
     static int n, m;
-    static int[][] tomato;
+    static int[][] box;
     static int[][] days;
     static final int[] dx = {-1, 1, 0, 0};
     static final int[] dy = {0, 0, -1, 1};
 
-    static class T {
-        int row;
-        int col;
-        public T(int row, int col) {
-            this.row = row;
-            this.col = col;
-        }
+    static final class Pos {
+        final int r, c;
+        Pos(int r, int c) { this.r = r; this.c = c; }
     }
+
+    static boolean in(int r, int c) { return 0 <= r && r < n && 0 <= c && c < m; }
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
         m = Integer.parseInt(st.nextToken());
         n = Integer.parseInt(st.nextToken());
-        tomato = new int[n][m];
+        box = new int[n][m];
         days = new int[n][m];
 
-        for(int i = 0; i < n; i++) {
+        Queue<Pos> q = new ArrayDeque<>();
+        int unripe = 0;
+
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(days[i], -1);
             st = new StringTokenizer(br.readLine());
-            for(int j = 0; j < m; j++) {
-                tomato[i][j] = Integer.parseInt(st.nextToken());
-                days[i][j] = -1;
+            for (int j = 0; j < m; j++) {
+                box[i][j] = Integer.parseInt(st.nextToken());
+                if (box[i][j] == 1) {
+                    q.offer(new Pos(i, j));
+                    days[i][j] = 0;
+                } else if (box[i][j] == 0) {
+                    unripe++;
+                }
             }
         }
 
-        Queue<T> q = new ArrayDeque<>();
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < m; j++) {
-                if(tomato[i][j] == 1) {
-                    q.offer(new T(i, j));
-                    days[i][j] = 0;
-                }
-            }
-        }
-        while(!q.isEmpty()) {
-            T curr = q.poll();
-            for(int i = 0; i < 4; i++) {
-                int nextRow = curr.row + dx[i];
-                int nextCol = curr.col + dy[i];
-                if(nextRow < 0 || nextRow >= n || nextCol < 0 || nextCol >= m) continue;
-                if(tomato[nextRow][nextCol] == -1) continue;
-                if(days[nextRow][nextCol] != -1) continue;
-                if(tomato[nextRow][nextCol] == 0) {
-                    days[nextRow][nextCol] = days[curr.row][curr.col] + 1;
-                    q.offer(new T(nextRow, nextCol));
-                }
-            }
+        if (unripe == 0) {
+            System.out.println(0);
+            return;
         }
 
         int maxDay = 0;
-        for(int i = 0; i < n; i++) {
-            for(int j = 0; j < m; j++) {
-                maxDay = Math.max(days[i][j], maxDay);
-                if(tomato[i][j] == 0 && days[i][j] == -1){
-                    System.out.println(-1);
-                    return;
-                }
+        while (!q.isEmpty()) {
+            Pos cur = q.poll();
+            for (int d = 0; d < 4; d++) {
+                int nr = cur.r + dx[d], nc = cur.c + dy[d];
+                if (!in(nr, nc)) continue;
+                if (days[nr][nc] != -1) continue;
+                if (box[nr][nc] != 0) continue;
+
+                days[nr][nc] = days[cur.r][cur.c] + 1;
+                maxDay = Math.max(maxDay, days[nr][nc]);
+                box[nr][nc] = 1;
+                unripe--;
+                q.offer(new Pos(nr, nc));
             }
         }
-        System.out.println(maxDay);
 
-    }
-
-    private static boolean checkInBox(int x, int y) {
-        return x >= 0 && x < n && y >= 0 && y < m;
+        System.out.println(unripe > 0 ? -1 : maxDay);
     }
 }
